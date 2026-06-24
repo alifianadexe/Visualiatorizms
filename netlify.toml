@@ -1,0 +1,16 @@
+# Netlify build configuration for Visualiatorizms.
+# With this file in the repo, Netlify auto-detects everything — you just
+# pick the repo in the dashboard and click Deploy.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Single-page app: send any unknown path back to index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
