@@ -180,6 +180,26 @@ body {
   padding: 12px;
 }
 
+.sidebar-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-footer .btn {
+  flex: 1;
+}
+
+.btn-ghost {
+  background: transparent;
+  font-size: 12px;
+}
+
+.hidden-input {
+  display: none;
+}
+
 /* ---------- Buttons ---------- */
 .btn {
   border: 1px solid var(--border);

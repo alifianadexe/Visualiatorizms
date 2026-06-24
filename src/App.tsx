@@ -1,13 +1,20 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import JournalList from './components/JournalList';
 import JournalEditor from './components/JournalEditor';
-import { createJournal, loadJournals, saveJournals } from './storage';
+import {
+  createJournal,
+  exportJournals,
+  loadOrSeedJournals,
+  parseImported,
+  saveJournals,
+} from './storage';
 import type { Journal } from './types';
 
 export default function App() {
-  const [journals, setJournals] = useState<Journal[]>(() => loadJournals());
+  const initial = useRef<Journal[]>(loadOrSeedJournals());
+  const [journals, setJournals] = useState<Journal[]>(() => initial.current);
   const [activeId, setActiveId] = useState<string | null>(
-    () => loadJournals()[0]?.id ?? null
+    () => initial.current[0]?.id ?? null
   );
   const [query, setQuery] = useState('');
 
@@ -58,6 +65,33 @@ export default function App() {
     );
   }
 
+  function handleExport() {
+    const blob = new Blob([exportJournals(journals)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `visualiatorizms-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImport(text: string) {
+    try {
+      const imported = parseImported(text);
+      if (imported.length === 0) {
+        alert('No journals found in that file.');
+        return;
+      }
+      setJournals((prev) => [...imported, ...prev]);
+      setActiveId(imported[0].id);
+      setQuery('');
+    } catch (err) {
+      alert(`Could not import file: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+
   return (
     <div className="app">
       <JournalList
@@ -68,6 +102,8 @@ export default function App() {
         onSelect={setActiveId}
         onCreate={handleCreate}
         onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={handleImport}
       />
       <main className="main">
         {active ? (

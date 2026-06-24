@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { Journal } from '../types';
 
 interface JournalListProps {
@@ -8,6 +9,8 @@ interface JournalListProps {
   onSelect: (id: string) => void;
   onCreate: () => void;
   onDelete: (id: string) => void;
+  onExport: () => void;
+  onImport: (text: string) => void;
 }
 
 function formatDate(ts: number): string {
@@ -26,7 +29,20 @@ export default function JournalList({
   onSelect,
   onCreate,
   onDelete,
+  onExport,
+  onImport,
 }: JournalListProps) {
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => onImport(String(reader.result ?? ''));
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
@@ -81,6 +97,26 @@ export default function JournalList({
           </button>
         ))}
       </nav>
+
+      <div className="sidebar-footer">
+        <button className="btn btn-ghost" onClick={onExport} title="Download all journals as JSON">
+          ⬇ Export
+        </button>
+        <button
+          className="btn btn-ghost"
+          onClick={() => fileInput.current?.click()}
+          title="Import journals from a JSON file"
+        >
+          ⬆ Import
+        </button>
+        <input
+          ref={fileInput}
+          type="file"
+          accept="application/json,.json"
+          className="hidden-input"
+          onChange={handleFile}
+        />
+      </div>
     </aside>
   );
 }

@@ -16,6 +16,8 @@ and it just runs.
 - 🎨 **Tailwind ready** — Tailwind (Play CDN) is loaded, so utility classes in
   your pasted components work out of the box, just like artifacts.
 - 🔎 **Search** across titles, notes, and code.
+- 📦 **Export / Import** all journals as a JSON file for backup or sharing.
+- 🌱 **Example journals** seeded on first run so you have something to play with.
 
 ## Writing a component
 
@@ -51,6 +53,23 @@ npm run dev      # start the dev server (http://localhost:5173)
 npm run build    # type-check + production build into dist/
 npm run preview  # preview the production build
 ```
+
+## Deployment (GitHub Pages)
+
+This repo ships a workflow at `.github/workflows/deploy.yml` that builds the app
+and publishes it to **GitHub Pages**. It runs on every push to the working
+branch / `main`, and can be triggered manually from the **Actions** tab
+(*Deploy to GitHub Pages* → *Run workflow*).
+
+The workflow auto-enables Pages (source = *GitHub Actions*). Once it completes,
+the site is available at:
+
+```
+https://<your-username>.github.io/<repo-name>/
+```
+
+The Vite `base` is set to `./` (relative), so the build works correctly from
+that sub-path with no extra configuration.
 
 ## Tech
 
