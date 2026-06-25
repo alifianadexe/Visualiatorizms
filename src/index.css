@@ -769,6 +769,113 @@ a {
   border-radius: 5px;
 }
 
+/* ---------- Visibility toggle (editor) ---------- */
+.visibility-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.vis-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease),
+    color 0.18s var(--ease);
+}
+
+.vis-option:hover {
+  border-color: var(--border-strong);
+}
+
+.vis-option.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.vis-name {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vis-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ---------- Visibility badge ---------- */
+.card-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vis-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px 2px 6px;
+  border-radius: 999px;
+}
+
+.vis-public {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.vis-private {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.14);
+}
+
+/* ---------- Filter toggle (home) ---------- */
+.filter-toggle {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.filter-pill {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.18s var(--ease), color 0.18s var(--ease);
+}
+
+.filter-pill:hover {
+  color: var(--text);
+}
+
+.filter-pill.active {
+  background: var(--muted);
+  color: var(--text);
+}
+
 /* ---------- Sync modal ---------- */
 .icon-btn-on {
   color: var(--accent);

@@ -44,8 +44,15 @@ backend server. The publishable key is browser-safe by design; override the URL
 and key with `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` env vars to point at
 your own project, and rotate the key anytime in the Supabase dashboard.
 
-Sync is **login-free**: each journal set lives under a long, random **sync
-code**. To use it:
+Every entry is **Public** or **Private** (chosen when you create it):
+
+- **Public** journals live in a shared space — visible to everyone using the
+  app, and anyone can add their own. No code needed.
+- **Private** journals live under your personal **sync code**; another device
+  sees them only after connecting with that same code.
+
+Sync is **login-free**: each private journal set lives under a long, random
+**sync code**. To use it:
 
 1. One-time: make sure the `journals` table exists in your Supabase project —
    run the SQL in **[SUPABASE.md](SUPABASE.md)**.

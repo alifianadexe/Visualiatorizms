@@ -78,11 +78,12 @@ export default function SyncDialog({
           ) : info.synced ? (
             <div className="sync-section">
               <p className="sync-status">
-                <span className="dot dot-on" /> This device is syncing.
+                <span className="dot dot-on" /> Your private journals are syncing.
               </p>
               <p className="muted-text">
-                Open the app on another device, choose <strong>Connect with a
-                code</strong>, and enter this sync code:
+                Public journals sync automatically. To see your <strong>private</strong>{' '}
+                journals on another device, open the app there, choose{' '}
+                <strong>Connect with a code</strong>, and enter this sync code:
               </p>
               <div className="code-box">
                 <code>{info.code}</code>
@@ -106,15 +107,17 @@ export default function SyncDialog({
           ) : (
             <div className="sync-section">
               <p className="muted-text">
-                Sync your journals across devices. Turn on sync to upload what's
-                on this device, or connect to an existing space with its code.
+                <strong>Public</strong> journals already sync to everyone
+                automatically. <strong>Private</strong> journals live under a
+                personal sync code. Create your private space to get a code, or
+                connect to an existing one.
               </p>
               <button
                 className="btn btn-primary"
                 disabled={busy}
                 onClick={() => run(controls.enable)}
               >
-                {busy ? 'Working…' : 'Turn on sync (upload this device)'}
+                {busy ? 'Working…' : 'Create my private space'}
               </button>
 
               <div className="divider"><span>or</span></div>

@@ -5,6 +5,8 @@ import Markdown from '../components/Markdown';
 import {
   ArrowLeftIcon,
   EditIcon,
+  GlobeIcon,
+  LockIcon,
   PlayIcon,
   TrashIcon,
 } from '../components/Icons';
@@ -78,7 +80,17 @@ export default function EntryPage() {
       </div>
 
       <header className="entry-head">
-        <span className={`badge badge-${journal.language}`}>{journal.language}</span>
+        <span className="card-badges">
+          <span className={`badge badge-${journal.language}`}>{journal.language}</span>
+          <span className={`vis-badge vis-${journal.visibility}`}>
+            {journal.visibility === 'public' ? (
+              <GlobeIcon width={12} height={12} />
+            ) : (
+              <LockIcon width={12} height={12} />
+            )}
+            {journal.visibility}
+          </span>
+        </span>
         <h1 className="entry-title">{journal.title || 'Untitled entry'}</h1>
         <p className="entry-meta">
           Updated{' '}

@@ -1,5 +1,10 @@
 export type Language = 'tsx' | 'jsx';
 
+export type Visibility = 'public' | 'private';
+
+/** Shared space id that everyone can read from and write to. */
+export const PUBLIC_SPACE = 'public';
+
 export interface Journal {
   id: string;
   /** Short title for the entry. */
@@ -9,6 +14,11 @@ export interface Journal {
   /** The JSX/TSX source code rendered on the entry's page. */
   code: string;
   language: Language;
+  /**
+   * public  → stored in the shared space, visible to everyone.
+   * private → stored under your sync code, visible only with that code.
+   */
+  visibility: Visibility;
   createdAt: number;
   updatedAt: number;
 }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { GlobeIcon, LockIcon } from './Icons';
 import type { Journal } from '../types';
 
 function excerpt(md: string, max = 140): string {
@@ -26,7 +27,17 @@ export default function JournalCard({ journal }: { journal: Journal }) {
   return (
     <Link to={`/entry/${journal.id}`} className="card">
       <div className="card-top">
-        <span className={`badge badge-${journal.language}`}>{journal.language}</span>
+        <span className="card-badges">
+          <span className={`badge badge-${journal.language}`}>{journal.language}</span>
+          <span className={`vis-badge vis-${journal.visibility}`}>
+            {journal.visibility === 'public' ? (
+              <GlobeIcon width={12} height={12} />
+            ) : (
+              <LockIcon width={12} height={12} />
+            )}
+            {journal.visibility}
+          </span>
+        </span>
         <span className="card-date">{relativeDate(journal.updatedAt)}</span>
       </div>
       <h3 className="card-title">{journal.title || 'Untitled entry'}</h3>

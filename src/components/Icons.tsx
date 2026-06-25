@@ -89,3 +89,11 @@ export const CheckIcon = (p: SVGProps<SVGSVGElement>) => (
 export const CloseIcon = (p: SVGProps<SVGSVGElement>) => (
   <Base {...p}><path d="M18 6 6 18M6 6l12 12" /></Base>
 );
+
+export const LockIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></Base>
+);
+
+export const GlobeIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18Z" /></Base>
+);

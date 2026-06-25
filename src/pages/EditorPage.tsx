@@ -2,11 +2,22 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeEditor from '../components/CodeEditor';
 import PreviewPanel from '../components/PreviewPanel';
-import { ArrowLeftIcon, PlayIcon, SaveIcon } from '../components/Icons';
+import {
+  ArrowLeftIcon,
+  GlobeIcon,
+  LockIcon,
+  PlayIcon,
+  SaveIcon,
+} from '../components/Icons';
 import { useApp } from '../appContext';
 import { getOne, newJournal } from '../store';
 import { DEFAULT_CODE } from '../samples';
-import { LANGUAGES, type Journal, type Language } from '../types';
+import {
+  LANGUAGES,
+  type Journal,
+  type Language,
+  type Visibility,
+} from '../types';
 
 export default function EditorPage() {
   const { id } = useParams();
@@ -18,19 +29,29 @@ export default function EditorPage() {
   const [saving, setSaving] = useState(false);
 
   // Load the entry being edited, or start a fresh draft for a new one.
+  // Guards ensure we initialize once and never clobber in-progress edits when
+  // `journals`/`loading` change (the component is remounted per route, so a
+  // fresh draft starts as null on navigation).
   useEffect(() => {
     if (!isEdit) {
-      setDraft(newJournal({ code: DEFAULT_CODE }));
+      if (!draft) setDraft(newJournal({ code: DEFAULT_CODE }));
       return;
     }
+    if (draft) return; // already loaded for this entry
     const fromList = journals.find((j) => j.id === id);
     if (fromList) {
       setDraft(fromList);
       return;
     }
     if (loading) return;
-    getOne(id ?? '').then((j) => setDraft(j ?? null));
-  }, [id, isEdit, journals, loading]);
+    let alive = true;
+    getOne(id ?? '').then((j) => {
+      if (alive) setDraft(j ?? null);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [id, isEdit, journals, loading, draft]);
 
   if (draft === null && isEdit) {
     return (
@@ -91,6 +112,30 @@ export default function EditorPage() {
               value={draft.title}
               onChange={(e) => patch({ title: e.target.value })}
             />
+          </div>
+
+          <div className="field">
+            <label>Visibility</label>
+            <div className="visibility-toggle" role="group" aria-label="Visibility">
+              <button
+                type="button"
+                className={`vis-option ${draft.visibility === 'private' ? 'active' : ''}`}
+                onClick={() => patch({ visibility: 'private' as Visibility })}
+              >
+                <LockIcon width={18} height={18} />
+                <span className="vis-name">Private</span>
+                <span className="vis-desc">Only with your sync code</span>
+              </button>
+              <button
+                type="button"
+                className={`vis-option ${draft.visibility === 'public' ? 'active' : ''}`}
+                onClick={() => patch({ visibility: 'public' as Visibility })}
+              >
+                <GlobeIcon width={18} height={18} />
+                <span className="vis-name">Public</span>
+                <span className="vis-desc">Anyone can see &amp; add</span>
+              </button>
+            </div>
           </div>
 
           <div className="field">

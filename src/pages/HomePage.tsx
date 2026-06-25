@@ -4,20 +4,25 @@ import JournalCard from '../components/JournalCard';
 import { PlusIcon, SearchIcon } from '../components/Icons';
 import { useApp } from '../appContext';
 
+type Filter = 'all' | 'public' | 'private';
+
 export default function HomePage() {
   const { journals, loading } = useApp();
   const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<Filter>('all');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return journals;
-    return journals.filter(
-      (j) =>
+    return journals.filter((j) => {
+      if (filter !== 'all' && j.visibility !== filter) return false;
+      if (!q) return true;
+      return (
         j.title.toLowerCase().includes(q) ||
         j.note.toLowerCase().includes(q) ||
         j.code.toLowerCase().includes(q)
-    );
-  }, [journals, query]);
+      );
+    });
+  }, [journals, query, filter]);
 
   return (
     <div className="page home">
@@ -40,9 +45,18 @@ export default function HomePage() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <span className="count">
-          {journals.length} {journals.length === 1 ? 'entry' : 'entries'}
-        </span>
+        <div className="filter-toggle" role="group" aria-label="Filter by visibility">
+          {(['all', 'public', 'private'] as Filter[]).map((f) => (
+            <button
+              key={f}
+              type="button"
+              className={`filter-pill ${filter === f ? 'active' : ''}`}
+              onClick={() => setFilter(f)}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (

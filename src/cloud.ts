@@ -1,4 +1,5 @@
 import type { Journal, Language } from './types';
+import { PUBLIC_SPACE } from './types';
 import { SUPABASE_KEY, SUPABASE_URL } from './supabaseConfig';
 
 /**
@@ -67,15 +68,17 @@ function rowToJournal(r: Row): Journal {
     note: r.note ?? '',
     code: r.code ?? '',
     language: (r.language === 'jsx' ? 'jsx' : 'tsx') as Language,
+    // Visibility is encoded by which space the row lives in.
+    visibility: r.space_id === PUBLIC_SPACE ? 'public' : 'private',
     createdAt: Number(r.created_at) || Date.now(),
     updatedAt: Number(r.updated_at) || Date.now(),
   };
 }
 
-function journalToRow(code: string, j: Journal): Row {
+function journalToRow(space: string, j: Journal): Row {
   return {
     id: j.id,
-    space_id: code,
+    space_id: space,
     title: j.title,
     note: j.note,
     code: j.code,
@@ -115,47 +118,49 @@ async function request(path: string, init: RequestInit): Promise<Response> {
   return res;
 }
 
-// ---- CRUD scoped to a sync code ----
+// ---- CRUD ----
 
-export async function getAll(code: string): Promise<Journal[]> {
+/** All journals in a given space (a sync code, or the public space). */
+export async function getAll(space: string): Promise<Journal[]> {
   const res = await request(
-    `${TABLE}?space_id=eq.${encodeURIComponent(code)}&order=updated_at.desc`,
+    `${TABLE}?space_id=eq.${encodeURIComponent(space)}&order=updated_at.desc`,
     { headers: headers() }
   );
   const rows = (await res.json()) as Row[];
   return rows.map(rowToJournal);
 }
 
-export async function getOne(code: string, id: string): Promise<Journal | undefined> {
-  const res = await request(
-    `${TABLE}?space_id=eq.${encodeURIComponent(code)}&id=eq.${encodeURIComponent(id)}`,
-    { headers: headers() }
-  );
+/** Look up a single journal by id across any space. */
+export async function getById(id: string): Promise<Journal | undefined> {
+  const res = await request(`${TABLE}?id=eq.${encodeURIComponent(id)}`, {
+    headers: headers(),
+  });
   const rows = (await res.json()) as Row[];
   return rows[0] ? rowToJournal(rows[0]) : undefined;
 }
 
-export async function put(code: string, journal: Journal): Promise<Journal> {
+export async function put(space: string, journal: Journal): Promise<Journal> {
   await request(`${TABLE}?on_conflict=id`, {
     method: 'POST',
     headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
-    body: JSON.stringify(journalToRow(code, journal)),
+    body: JSON.stringify(journalToRow(space, journal)),
   });
   return journal;
 }
 
-export async function putMany(code: string, journals: Journal[]): Promise<void> {
+export async function putMany(space: string, journals: Journal[]): Promise<void> {
   if (journals.length === 0) return;
   await request(`${TABLE}?on_conflict=id`, {
     method: 'POST',
     headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
-    body: JSON.stringify(journals.map((j) => journalToRow(code, j))),
+    body: JSON.stringify(journals.map((j) => journalToRow(space, j))),
   });
 }
 
-export async function remove(code: string, id: string): Promise<void> {
-  await request(
-    `${TABLE}?space_id=eq.${encodeURIComponent(code)}&id=eq.${encodeURIComponent(id)}`,
-    { method: 'DELETE', headers: headers({ Prefer: 'return=minimal' }) }
-  );
+/** Delete a journal by id regardless of which space it is in. */
+export async function removeById(id: string): Promise<void> {
+  await request(`${TABLE}?id=eq.${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: headers({ Prefer: 'return=minimal' }),
+  });
 }

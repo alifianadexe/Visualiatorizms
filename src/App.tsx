@@ -4,6 +4,7 @@ import {
   Outlet,
   Route,
   Routes,
+  useLocation,
   useNavigate,
 } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -83,7 +84,7 @@ function DataProvider() {
   const syncControls: SyncControls = {
     info: sync,
     enable: useCallback(async () => {
-      const code = await store.enableSync();
+      const code = await store.enablePrivate();
       await refresh();
       return code;
     }, [refresh]),
@@ -116,15 +117,21 @@ function DataProvider() {
   );
 }
 
+/** Remount the editor per route so its draft state resets on navigation. */
+function EditorRoute() {
+  const location = useLocation();
+  return <EditorPage key={location.pathname} />;
+}
+
 export default function App() {
   return (
     <HashRouter>
       <Routes>
         <Route element={<DataProvider />}>
           <Route index element={<HomePage />} />
-          <Route path="new" element={<EditorPage />} />
+          <Route path="new" element={<EditorRoute />} />
           <Route path="entry/:id" element={<EntryPage />} />
-          <Route path="entry/:id/edit" element={<EditorPage />} />
+          <Route path="entry/:id/edit" element={<EditorRoute />} />
           <Route path="*" element={<HomePage />} />
         </Route>
       </Routes>

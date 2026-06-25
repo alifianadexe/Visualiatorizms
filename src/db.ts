@@ -63,6 +63,7 @@ export function newJournal(partial?: Partial<Journal>): Journal {
     note: partial?.note ?? '',
     code: partial?.code ?? '',
     language: (partial?.language as Language) ?? 'tsx',
+    visibility: partial?.visibility ?? 'private',
     createdAt: partial?.createdAt ?? now,
     updatedAt: partial?.updatedAt ?? now,
   };
