@@ -656,6 +656,119 @@ a {
   min-height: 420px;
 }
 
+/* ---------- Preview panel + fullscreen ---------- */
+.preview-panel {
+  position: relative;
+}
+
+.maximize-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: #475569;
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.18s var(--ease), background 0.18s var(--ease),
+    color 0.18s var(--ease);
+}
+
+.preview-panel:hover .maximize-btn,
+.maximize-btn:focus-visible {
+  opacity: 1;
+}
+
+.maximize-btn:hover {
+  background: #fff;
+  color: #0f172a;
+}
+
+.maximize-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.result-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  background: var(--surface);
+}
+
+.preview-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  animation: fs-in 0.18s var(--ease);
+}
+
+@keyframes fs-in {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.preview-fs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-fs-title {
+  margin: 0;
+}
+
+.preview-fs-body {
+  flex: 1;
+  min-height: 0;
+  background: #ffffff;
+  overflow: auto;
+}
+
+.preview-fs-canvas {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-fs-canvas > * {
+  flex: 1;
+}
+
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 5px;
+  margin-left: 2px;
+  color: var(--text-muted);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
 /* ---------- Live preview errors ---------- */
 .preview-error {
   margin: 14px;

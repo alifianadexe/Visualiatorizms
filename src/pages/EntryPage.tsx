@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import LivePreview from '../components/LivePreview';
+import PreviewPanel from '../components/PreviewPanel';
 import Markdown from '../components/Markdown';
 import {
   ArrowLeftIcon,
@@ -95,9 +95,11 @@ export default function EntryPage() {
           <PlayIcon width={16} height={16} />
           <span>Result</span>
         </div>
-        <div className="result-surface">
-          <LivePreview code={journal.code} language={journal.language} />
-        </div>
+        <PreviewPanel
+          code={journal.code}
+          language={journal.language}
+          title="Result"
+        />
       </section>
 
       {journal.note.trim() && (

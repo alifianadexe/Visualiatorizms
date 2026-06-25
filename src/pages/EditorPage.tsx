@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CodeEditor from '../components/CodeEditor';
-import LivePreview from '../components/LivePreview';
+import PreviewPanel from '../components/PreviewPanel';
 import { ArrowLeftIcon, PlayIcon, SaveIcon } from '../components/Icons';
 import { useApp } from '../appContext';
 import { getOne, newJournal } from '../db';
@@ -135,9 +135,11 @@ export default function EditorPage() {
             <PlayIcon width={16} height={16} />
             <span>Live preview</span>
           </div>
-          <div className="result-surface">
-            <LivePreview code={draft.code} language={draft.language} />
-          </div>
+          <PreviewPanel
+            code={draft.code}
+            language={draft.language}
+            title="Live preview"
+          />
         </div>
       </div>
     </div>

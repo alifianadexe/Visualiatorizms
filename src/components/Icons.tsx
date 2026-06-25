@@ -61,3 +61,11 @@ export const SearchIcon = (p: SVGProps<SVGSVGElement>) => (
 export const SaveIcon = (p: SVGProps<SVGSVGElement>) => (
   <Base {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" /><path d="M17 21v-8H7v8M7 3v5h8" /></Base>
 );
+
+export const MaximizeIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></Base>
+);
+
+export const MinimizeIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M16 21v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" /></Base>
+);
