@@ -20,6 +20,8 @@ note, and code.
 - ⚛️ **Live JSX/TSX** — compiled in the browser with `@babel/standalone`
   (JSX **and** TypeScript), rendered behind an error boundary so a bad snippet
   shows a friendly message instead of a blank screen.
+- 🌐 **Live HTML** — plain HTML/CSS/JS entries render in a sandboxed iframe, so
+  styles and `<script>` run in isolation exactly as written.
 - 📝 **Markdown notes** rendered with `marked`.
 - 💾 **Durable storage** — entries are saved in **IndexedDB** (see below), so
   they persist long-term on your device. Data from the previous localStorage
@@ -87,6 +89,8 @@ export default function Demo() {
   `useReducer`, `useContext`, `useLayoutEffect`, `Fragment`) are available
   without importing them. You can also `import React from 'react'` explicitly.
 - Only `react` and `react-dom` are importable in the sandbox.
+- Pick **TSX**, **JSX**, or **HTML** from the toggle. HTML entries render in a
+  sandboxed iframe (full HTML/CSS/JS) and don't use the React scope above.
 
 ## Design
 

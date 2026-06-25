@@ -20,6 +20,64 @@ export const DEFAULT_CODE = `export default function Demo() {
 }
 `;
 
+export const DEFAULT_HTML = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: system-ui, sans-serif;
+        background: #f8fafc;
+      }
+      .card {
+        text-align: center;
+        padding: 2rem 2.5rem;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      }
+      h2 { margin: 0 0 .5rem; color: #1e293b; }
+      p { color: #64748b; }
+      button {
+        margin-top: 1rem;
+        padding: .55rem 1.1rem;
+        border: 0;
+        border-radius: 8px;
+        background: #22c55e;
+        color: #052e16;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Hello from plain HTML</h2>
+      <p id="msg">CSS and &lt;script&gt; run here too.</p>
+      <button onclick="msg.textContent = 'Clicked at ' + new Date().toLocaleTimeString()">
+        Click me
+      </button>
+    </div>
+  </body>
+</html>
+`;
+
+/** Default starter code per language, used when switching the language toggle. */
+export const DEFAULT_CODE_FOR: Record<string, string> = {
+  tsx: DEFAULT_CODE,
+  jsx: DEFAULT_CODE,
+  html: DEFAULT_HTML,
+};
+
+/** Whether a code string is still one of the untouched starter templates. */
+export function isStarterCode(code: string): boolean {
+  return code.trim() === DEFAULT_CODE.trim() || code.trim() === DEFAULT_HTML.trim();
+}
+
 export const SEED_JOURNALS: Partial<Journal>[] = [
   {
     title: 'Welcome to your code journal',

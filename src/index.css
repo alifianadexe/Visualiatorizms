@@ -382,6 +382,11 @@ a {
   background: rgba(250, 204, 21, 0.14);
 }
 
+.badge-html {
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.16);
+}
+
 /* ---------- Empty states ---------- */
 .empty {
   display: flex;
@@ -476,12 +481,26 @@ a {
 }
 
 .result-surface {
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   color: #0f172a;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: auto;
   min-height: 260px;
+}
+
+.result-surface > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.html-frame {
+  width: 100%;
+  border: 0;
+  background: #ffffff;
+  min-height: 320px;
 }
 
 .entry .result-surface {

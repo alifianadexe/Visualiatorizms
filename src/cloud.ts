@@ -1,5 +1,5 @@
-import type { Journal, Language } from './types';
-import { PUBLIC_SPACE } from './types';
+import type { Journal } from './types';
+import { asLanguage, PUBLIC_SPACE } from './types';
 import { SUPABASE_KEY, SUPABASE_URL } from './supabaseConfig';
 
 /**
@@ -67,7 +67,7 @@ function rowToJournal(r: Row): Journal {
     title: r.title ?? '',
     note: r.note ?? '',
     code: r.code ?? '',
-    language: (r.language === 'jsx' ? 'jsx' : 'tsx') as Language,
+    language: asLanguage(r.language),
     // Visibility is encoded by which space the row lives in.
     visibility: r.space_id === PUBLIC_SPACE ? 'public' : 'private',
     createdAt: Number(r.created_at) || Date.now(),

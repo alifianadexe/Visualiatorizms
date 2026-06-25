@@ -1,4 +1,9 @@
-export type Language = 'tsx' | 'jsx';
+export type Language = 'tsx' | 'jsx' | 'html';
+
+/** Coerce arbitrary input into a known language, defaulting to tsx. */
+export function asLanguage(value: unknown): Language {
+  return value === 'jsx' ? 'jsx' : value === 'html' ? 'html' : 'tsx';
+}
 
 export type Visibility = 'public' | 'private';
 
@@ -23,4 +28,4 @@ export interface Journal {
   updatedAt: number;
 }
 
-export const LANGUAGES: Language[] = ['tsx', 'jsx'];
+export const LANGUAGES: Language[] = ['tsx', 'jsx', 'html'];

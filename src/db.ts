@@ -1,4 +1,5 @@
 import type { Journal, Language } from './types';
+import { asLanguage } from './types';
 import { SEED_JOURNALS } from './samples';
 
 /**
@@ -135,7 +136,7 @@ function migrateLegacy(): Journal[] {
         // old field name was "notes"
         note: item?.note ?? item?.notes ?? '',
         code: item?.code,
-        language: item?.language === 'jsx' ? 'jsx' : 'tsx',
+        language: asLanguage(item?.language),
         createdAt: item?.createdAt,
         updatedAt: item?.updatedAt,
       })
@@ -178,7 +179,7 @@ export async function importFrom(raw: string): Promise<Journal[]> {
       title: item?.title,
       note: item?.note ?? item?.notes ?? '',
       code: item?.code,
-      language: item?.language === 'jsx' ? 'jsx' : 'tsx',
+      language: asLanguage(item?.language),
     })
   );
   const db = await openDB();

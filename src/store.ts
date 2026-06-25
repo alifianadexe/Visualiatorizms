@@ -1,6 +1,6 @@
 import * as local from './db';
 import * as cloud from './cloud';
-import { PUBLIC_SPACE, type Journal, type Visibility } from './types';
+import { asLanguage, PUBLIC_SPACE, type Journal, type Visibility } from './types';
 
 /**
  * Unified storage facade with public/private spaces.
@@ -211,7 +211,7 @@ function parseJournals(raw: string): Journal[] {
       title: item?.title,
       note: item?.note ?? item?.notes ?? '',
       code: item?.code,
-      language: item?.language === 'jsx' ? 'jsx' : 'tsx',
+      language: asLanguage(item?.language),
       visibility: item?.visibility === 'public' ? 'public' : 'private',
     })
   );

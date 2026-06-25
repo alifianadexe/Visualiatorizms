@@ -1,5 +1,6 @@
 import { Component, useMemo, type ComponentType, type ReactNode } from 'react';
 import { compile } from '../runner';
+import HtmlPreview from './HtmlPreview';
 import type { Language } from '../types';
 
 interface LivePreviewProps {
@@ -8,6 +9,15 @@ interface LivePreviewProps {
 }
 
 export default function LivePreview({ code, language }: LivePreviewProps) {
+  // Plain HTML renders in a sandboxed iframe rather than being compiled.
+  if (language === 'html') {
+    return <HtmlPreview code={code} />;
+  }
+
+  return <CompiledPreview code={code} language={language} />;
+}
+
+function CompiledPreview({ code, language }: LivePreviewProps) {
   // Recompile whenever the code or language changes.
   const { Component: Rendered, error } = useMemo(
     () => compile(code, language),

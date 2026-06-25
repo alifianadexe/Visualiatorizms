@@ -11,7 +11,7 @@ import {
 } from '../components/Icons';
 import { useApp } from '../appContext';
 import { getOne, newJournal } from '../store';
-import { DEFAULT_CODE } from '../samples';
+import { DEFAULT_CODE, DEFAULT_CODE_FOR, isStarterCode } from '../samples';
 import {
   LANGUAGES,
   type Journal,
@@ -70,6 +70,16 @@ export default function EditorPage() {
 
   const patch = (p: Partial<Journal>) =>
     setDraft((d) => (d ? { ...d, ...p } : d));
+
+  // Switching language swaps the starter template — but only while the code is
+  // still an untouched default, so we never clobber what the user wrote.
+  function changeLanguage(language: Language) {
+    setDraft((d) => {
+      if (!d) return d;
+      const code = isStarterCode(d.code) ? DEFAULT_CODE_FOR[language] : d.code;
+      return { ...d, language, code };
+    });
+  }
 
   async function handleSave() {
     if (!draft || saving) return;
@@ -159,7 +169,7 @@ export default function EditorPage() {
                     key={l}
                     type="button"
                     className={`lang-pill ${draft.language === l ? 'active' : ''}`}
-                    onClick={() => patch({ language: l as Language })}
+                    onClick={() => changeLanguage(l)}
                   >
                     {l.toUpperCase()}
                   </button>
