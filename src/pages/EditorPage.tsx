@@ -4,7 +4,7 @@ import CodeEditor from '../components/CodeEditor';
 import PreviewPanel from '../components/PreviewPanel';
 import { ArrowLeftIcon, PlayIcon, SaveIcon } from '../components/Icons';
 import { useApp } from '../appContext';
-import { getOne, newJournal } from '../db';
+import { getOne, newJournal } from '../store';
 import { DEFAULT_CODE } from '../samples';
 import { LANGUAGES, type Journal, type Language } from '../types';
 

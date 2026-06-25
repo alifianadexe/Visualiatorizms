@@ -11,27 +11,31 @@ import HomePage from './pages/HomePage';
 import EditorPage from './pages/EditorPage';
 import EntryPage from './pages/EntryPage';
 import type { AppContext } from './appContext';
-import * as db from './db';
-import { serialize } from './db';
+import * as store from './store';
+import { serialize } from './store';
 import type { Journal } from './types';
+import type { SyncControls } from './components/SyncDialog';
 
 function DataProvider() {
   const [journals, setJournals] = useState<Journal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sync, setSync] = useState(() => store.getSyncInfo());
   const navigate = useNavigate();
 
   const refresh = useCallback(async () => {
-    const all = await db.getAll();
+    const all = await store.getAll();
     setJournals(all);
+    setSync(store.getSyncInfo());
   }, []);
 
   useEffect(() => {
     let alive = true;
     (async () => {
-      const all = await db.getAll();
-      if (alive) {
-        setJournals(all);
-        setLoading(false);
+      try {
+        const all = await store.getAll();
+        if (alive) setJournals(all);
+      } finally {
+        if (alive) setLoading(false);
       }
     })();
     return () => {
@@ -41,7 +45,7 @@ function DataProvider() {
 
   const saveJournal = useCallback(
     async (journal: Journal) => {
-      const saved = await db.put(journal);
+      const saved = await store.put(journal);
       await refresh();
       return saved;
     },
@@ -50,7 +54,7 @@ function DataProvider() {
 
   const deleteJournal = useCallback(
     async (id: string) => {
-      await db.remove(id);
+      await store.remove(id);
       await refresh();
     },
     [refresh]
@@ -69,12 +73,32 @@ function DataProvider() {
   const importFile = useCallback(
     async (file: File) => {
       const text = await file.text();
-      const created = await db.importFrom(text);
+      const created = await store.importFrom(text);
       await refresh();
       if (created[0]) navigate(`/entry/${created[0].id}`);
     },
     [refresh, navigate]
   );
+
+  const syncControls: SyncControls = {
+    info: sync,
+    enable: useCallback(async () => {
+      const code = await store.enableSync();
+      await refresh();
+      return code;
+    }, [refresh]),
+    connect: useCallback(
+      async (code: string) => {
+        await store.connect(code);
+        await refresh();
+      },
+      [refresh]
+    ),
+    disconnect: useCallback(async () => {
+      store.disconnect();
+      await refresh();
+    }, [refresh]),
+  };
 
   const context: AppContext = {
     journals,
@@ -86,7 +110,7 @@ function DataProvider() {
   };
 
   return (
-    <Layout onExport={exportAll} onImport={importFile}>
+    <Layout onExport={exportAll} onImport={importFile} sync={syncControls}>
       <Outlet context={context} />
     </Layout>
   );

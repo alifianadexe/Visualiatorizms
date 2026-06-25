@@ -31,13 +31,27 @@ note, and code.
 
 ## Storage
 
-Journals are stored in **IndexedDB** under the database `visualiatorizms`
-(object store `journals`). IndexedDB was chosen because it is durable, has a
-large quota (code snippets add up), and needs no backend — a good fit for a
-static deployment. The storage layer lives in [`src/db.ts`](src/db.ts) and
-exposes a small async repository (`getAll`, `getOne`, `put`, `remove`,
-`serialize`, `importFrom`). Swapping in a cloud backend later only means
-providing another implementation of that interface.
+By default, journals are stored in **IndexedDB** (`src/db.ts`) — durable,
+offline, and local to one browser. A small facade in
+[`src/store.ts`](src/store.ts) routes reads/writes either to that local store
+or to the cloud, depending on whether sync is on.
+
+### Cross-device sync (optional)
+
+To sync journals across devices, connect a free **Supabase** project. The app
+calls Supabase's REST API directly from the browser (`src/cloud.ts`) — no
+backend server. Sync is **login-free**: each journal set lives under a long,
+random **sync code**; turn on sync on one device to get a code, then enter that
+same code on another device to share the data.
+
+Click the **cloud icon** in the header to manage it. Full setup (create the
+project, run one SQL snippet, set two env vars) is in
+**[SUPABASE.md](SUPABASE.md)**. Without configuration the app simply stays
+local.
+
+> Trade-off: anyone who has your sync code can read/edit that journal set, so
+> keep it private. (Email-login accounts can be added later if you want stricter
+> privacy.)
 
 ## Writing a component
 

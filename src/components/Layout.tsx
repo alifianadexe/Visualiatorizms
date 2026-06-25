@@ -1,15 +1,25 @@
-import { useRef, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { DownloadIcon, PlusIcon, UploadIcon } from './Icons';
+import {
+  CloudIcon,
+  CloudSyncedIcon,
+  DownloadIcon,
+  PlusIcon,
+  UploadIcon,
+} from './Icons';
+import SyncDialog, { type SyncControls } from './SyncDialog';
 
 interface LayoutProps {
   children: ReactNode;
   onExport?: () => void;
   onImport?: (file: File) => void;
+  sync?: SyncControls;
 }
 
-export default function Layout({ children, onExport, onImport }: LayoutProps) {
+export default function Layout({ children, onExport, onImport, sync }: LayoutProps) {
   const fileInput = useRef<HTMLInputElement>(null);
+  const [syncOpen, setSyncOpen] = useState(false);
+  const synced = Boolean(sync?.info.synced);
 
   return (
     <div className="shell">
@@ -20,6 +30,15 @@ export default function Layout({ children, onExport, onImport }: LayoutProps) {
         </Link>
 
         <div className="topbar-actions">
+          <button
+            type="button"
+            className={`icon-btn ${synced ? 'icon-btn-on' : ''}`}
+            title={synced ? 'Cloud sync is on' : 'Set up cloud sync'}
+            aria-label="Cloud sync"
+            onClick={() => setSyncOpen(true)}
+          >
+            {synced ? <CloudSyncedIcon /> : <CloudIcon />}
+          </button>
           <button
             type="button"
             className="icon-btn"
@@ -55,6 +74,10 @@ export default function Layout({ children, onExport, onImport }: LayoutProps) {
       </header>
 
       <main className="content">{children}</main>
+
+      {syncOpen && sync && (
+        <SyncDialog controls={sync} onClose={() => setSyncOpen(false)} />
+      )}
     </div>
   );
 }

@@ -1,0 +1,155 @@
+import type { Journal, Language } from './types';
+
+/**
+ * Cloud sync via Supabase's REST API (PostgREST), called directly from the
+ * browser — no SDK dependency and no backend server.
+ *
+ * Access model (the "sync code" approach): every row carries a `space_id`.
+ * Knowing the long, random space id (the sync code) is what grants access to
+ * that set of journals. Enter the same code on another device to sync. This is
+ * intentionally login-free; the trade-off is that anyone who has your code can
+ * read/write that space, so treat the code like a password.
+ */
+
+const URL_BASE = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '') ?? '';
+const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
+const TABLE = 'journals';
+const CODE_KEY = 'visualiatorizms.syncCode';
+
+export function isConfigured(): boolean {
+  return Boolean(URL_BASE && ANON);
+}
+
+// ---- Sync code management ----
+
+export function getSyncCode(): string | null {
+  try {
+    return localStorage.getItem(CODE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setSyncCode(code: string): void {
+  localStorage.setItem(CODE_KEY, code);
+}
+
+export function clearSyncCode(): void {
+  localStorage.removeItem(CODE_KEY);
+}
+
+/** A long, unguessable code so spaces can't be enumerated. */
+export function generateSyncCode(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `vzm-${hex.slice(0, 8)}-${hex.slice(8, 16)}-${hex.slice(16, 24)}-${hex.slice(24)}`;
+}
+
+// ---- Row <-> Journal mapping (DB uses snake_case) ----
+
+interface Row {
+  id: string;
+  space_id: string;
+  title: string;
+  note: string;
+  code: string;
+  language: string;
+  created_at: number;
+  updated_at: number;
+}
+
+function rowToJournal(r: Row): Journal {
+  return {
+    id: r.id,
+    title: r.title ?? '',
+    note: r.note ?? '',
+    code: r.code ?? '',
+    language: (r.language === 'jsx' ? 'jsx' : 'tsx') as Language,
+    createdAt: Number(r.created_at) || Date.now(),
+    updatedAt: Number(r.updated_at) || Date.now(),
+  };
+}
+
+function journalToRow(code: string, j: Journal): Row {
+  return {
+    id: j.id,
+    space_id: code,
+    title: j.title,
+    note: j.note,
+    code: j.code,
+    language: j.language,
+    created_at: j.createdAt,
+    updated_at: j.updatedAt,
+  };
+}
+
+// ---- REST helpers ----
+
+function headers(extra?: Record<string, string>): Record<string, string> {
+  return {
+    apikey: ANON,
+    Authorization: `Bearer ${ANON}`,
+    'Content-Type': 'application/json',
+    ...extra,
+  };
+}
+
+async function request(path: string, init: RequestInit): Promise<Response> {
+  if (!isConfigured()) {
+    throw new Error('Cloud sync is not configured for this site.');
+  }
+  const res = await fetch(`${URL_BASE}/rest/v1/${path}`, init);
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(
+      `Sync failed (${res.status}). ${body || 'Check your Supabase setup and sync code.'}`
+    );
+  }
+  return res;
+}
+
+// ---- CRUD scoped to a sync code ----
+
+export async function getAll(code: string): Promise<Journal[]> {
+  const res = await request(
+    `${TABLE}?space_id=eq.${encodeURIComponent(code)}&order=updated_at.desc`,
+    { headers: headers() }
+  );
+  const rows = (await res.json()) as Row[];
+  return rows.map(rowToJournal);
+}
+
+export async function getOne(code: string, id: string): Promise<Journal | undefined> {
+  const res = await request(
+    `${TABLE}?space_id=eq.${encodeURIComponent(code)}&id=eq.${encodeURIComponent(id)}`,
+    { headers: headers() }
+  );
+  const rows = (await res.json()) as Row[];
+  return rows[0] ? rowToJournal(rows[0]) : undefined;
+}
+
+export async function put(code: string, journal: Journal): Promise<Journal> {
+  await request(`${TABLE}?on_conflict=id`, {
+    method: 'POST',
+    headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+    body: JSON.stringify(journalToRow(code, journal)),
+  });
+  return journal;
+}
+
+export async function putMany(code: string, journals: Journal[]): Promise<void> {
+  if (journals.length === 0) return;
+  await request(`${TABLE}?on_conflict=id`, {
+    method: 'POST',
+    headers: headers({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+    body: JSON.stringify(journals.map((j) => journalToRow(code, j))),
+  });
+}
+
+export async function remove(code: string, id: string): Promise<void> {
+  await request(
+    `${TABLE}?space_id=eq.${encodeURIComponent(code)}&id=eq.${encodeURIComponent(id)}`,
+    { method: 'DELETE', headers: headers({ Prefer: 'return=minimal' }) }
+  );
+}

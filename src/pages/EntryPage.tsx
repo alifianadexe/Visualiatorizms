@@ -9,7 +9,7 @@ import {
   TrashIcon,
 } from '../components/Icons';
 import { useApp } from '../appContext';
-import { getOne } from '../db';
+import { getOne } from '../store';
 import type { Journal } from '../types';
 
 export default function EntryPage() {

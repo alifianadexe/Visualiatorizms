@@ -69,3 +69,23 @@ export const MaximizeIcon = (p: SVGProps<SVGSVGElement>) => (
 export const MinimizeIcon = (p: SVGProps<SVGSVGElement>) => (
   <Base {...p}><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M16 21v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" /></Base>
 );
+
+export const CloudIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><path d="M17.5 19a4.5 4.5 0 0 0 .5-8.97A6 6 0 0 0 6.34 9.4 4 4 0 0 0 7 17.5" /></Base>
+);
+
+export const CloudSyncedIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><path d="M17.5 19a4.5 4.5 0 0 0 .5-8.97A6 6 0 0 0 6.34 9.4 4 4 0 0 0 7 17.5" /><path d="m9 13 2 2 3.5-3.5" /></Base>
+);
+
+export const CopyIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></Base>
+);
+
+export const CheckIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><path d="M20 6 9 17l-5-5" /></Base>
+);
+
+export const CloseIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Base {...p}><path d="M18 6 6 18M6 6l12 12" /></Base>
+);
