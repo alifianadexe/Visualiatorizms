@@ -1,133 +1,109 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import JournalList from './components/JournalList';
-import JournalEditor from './components/JournalEditor';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  createJournal,
-  exportJournals,
-  loadOrSeedJournals,
-  parseImported,
-  saveJournals,
-} from './storage';
+  HashRouter,
+  Outlet,
+  Route,
+  Routes,
+  useNavigate,
+} from 'react-router-dom';
+import Layout from './components/Layout';
+import HomePage from './pages/HomePage';
+import EditorPage from './pages/EditorPage';
+import EntryPage from './pages/EntryPage';
+import type { AppContext } from './appContext';
+import * as db from './db';
+import { serialize } from './db';
 import type { Journal } from './types';
 
-export default function App() {
-  const initial = useRef<Journal[]>(loadOrSeedJournals());
-  const [journals, setJournals] = useState<Journal[]>(() => initial.current);
-  const [activeId, setActiveId] = useState<string | null>(
-    () => initial.current[0]?.id ?? null
-  );
-  const [query, setQuery] = useState('');
+function DataProvider() {
+  const [journals, setJournals] = useState<Journal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  // Persist to localStorage whenever journals change.
+  const refresh = useCallback(async () => {
+    const all = await db.getAll();
+    setJournals(all);
+  }, []);
+
   useEffect(() => {
-    saveJournals(journals);
-  }, [journals]);
+    let alive = true;
+    (async () => {
+      const all = await db.getAll();
+      if (alive) {
+        setJournals(all);
+        setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const sorted = [...journals].sort((a, b) => b.updatedAt - a.updatedAt);
-    if (!q) return sorted;
-    return sorted.filter(
-      (j) =>
-        j.title.toLowerCase().includes(q) ||
-        j.notes.toLowerCase().includes(q) ||
-        j.code.toLowerCase().includes(q)
-    );
-  }, [journals, query]);
-
-  const active = useMemo(
-    () => journals.find((j) => j.id === activeId) ?? null,
-    [journals, activeId]
+  const saveJournal = useCallback(
+    async (journal: Journal) => {
+      const saved = await db.put(journal);
+      await refresh();
+      return saved;
+    },
+    [refresh]
   );
 
-  function handleCreate() {
-    const journal = createJournal();
-    setJournals((prev) => [journal, ...prev]);
-    setActiveId(journal.id);
-    setQuery('');
-  }
+  const deleteJournal = useCallback(
+    async (id: string) => {
+      await db.remove(id);
+      await refresh();
+    },
+    [refresh]
+  );
 
-  function handleDelete(id: string) {
-    setJournals((prev) => prev.filter((j) => j.id !== id));
-    setActiveId((curr) => {
-      if (curr !== id) return curr;
-      const remaining = journals.filter((j) => j.id !== id);
-      return remaining[0]?.id ?? null;
-    });
-  }
-
-  function handlePatch(patch: Partial<Journal>) {
-    if (!active) return;
-    setJournals((prev) =>
-      prev.map((j) =>
-        j.id === active.id ? { ...j, ...patch, updatedAt: Date.now() } : j
-      )
-    );
-  }
-
-  function handleExport() {
-    const blob = new Blob([exportJournals(journals)], {
-      type: 'application/json',
-    });
+  const exportAll = useCallback(() => {
+    const blob = new Blob([serialize(journals)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `visualiatorizms-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }
+  }, [journals]);
 
-  function handleImport(text: string) {
-    try {
-      const imported = parseImported(text);
-      if (imported.length === 0) {
-        alert('No journals found in that file.');
-        return;
-      }
-      setJournals((prev) => [...imported, ...prev]);
-      setActiveId(imported[0].id);
-      setQuery('');
-    } catch (err) {
-      alert(`Could not import file: ${err instanceof Error ? err.message : err}`);
-    }
-  }
+  const importFile = useCallback(
+    async (file: File) => {
+      const text = await file.text();
+      const created = await db.importFrom(text);
+      await refresh();
+      if (created[0]) navigate(`/entry/${created[0].id}`);
+    },
+    [refresh, navigate]
+  );
+
+  const context: AppContext = {
+    journals,
+    loading,
+    saveJournal,
+    deleteJournal,
+    exportAll,
+    importFile,
+  };
 
   return (
-    <div className="app">
-      <JournalList
-        journals={filtered}
-        activeId={activeId}
-        query={query}
-        onQueryChange={setQuery}
-        onSelect={setActiveId}
-        onCreate={handleCreate}
-        onDelete={handleDelete}
-        onExport={handleExport}
-        onImport={handleImport}
-      />
-      <main className="main">
-        {active ? (
-          <JournalEditor journal={active} onChange={handlePatch} />
-        ) : (
-          <Welcome onCreate={handleCreate} />
-        )}
-      </main>
-    </div>
+    <Layout onExport={exportAll} onImport={importFile}>
+      <Outlet context={context} />
+    </Layout>
   );
 }
 
-function Welcome({ onCreate }: { onCreate: () => void }) {
+export default function App() {
   return (
-    <div className="welcome">
-      <h1>Your JSX/TSX Learning Journal</h1>
-      <p>
-        Write notes and paste live React components — the same JSX/TSX artifacts
-        you get when you ask for a visualization. Everything runs right here in
-        your browser and is saved locally.
-      </p>
-      <button className="btn btn-primary btn-lg" onClick={onCreate}>
-        + Create your first journal
-      </button>
-    </div>
+    <HashRouter>
+      <Routes>
+        <Route element={<DataProvider />}>
+          <Route index element={<HomePage />} />
+          <Route path="new" element={<EditorPage />} />
+          <Route path="entry/:id" element={<EntryPage />} />
+          <Route path="entry/:id/edit" element={<EditorPage />} />
+          <Route path="*" element={<HomePage />} />
+        </Route>
+      </Routes>
+    </HashRouter>
   );
 }

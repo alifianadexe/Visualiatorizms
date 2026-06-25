@@ -1,34 +1,54 @@
 # Visualiatorizms
 
-A simple **notes / learning journal** platform where each entry can contain a
-**live, runnable JSX or TSX component** — the same kind of "artifacts" you get
-when you ask for an example or a visualization. Paste your code, hit nothing,
-and it just runs.
+A **developer journal** for learning. Each entry is a **Title + Note + Code**,
+and saving it produces a dedicated page where the JSX/TSX **runs live** — your
+own growing library of runnable artifacts.
+
+## The flow
+
+1. Click **New entry**.
+2. Fill in a **Title**, a **Note** (Markdown), and your **Code** (JSX or TSX).
+   A live preview updates as you type.
+3. **Save** → you land on the entry's page, where the component runs for real,
+   right beside your note. Edit or delete it anytime.
+
+Entries are listed on the home page and are fully searchable across title,
+note, and code.
 
 ## Features
 
-- 📝 **Journals** — keep as many learning notes as you like, each with a title,
-  Markdown notes, and a code component.
-- ⚛️ **Live JSX/TSX** — paste a React component and see it render instantly. The
-  code is compiled in your browser with Babel (JSX **and** TypeScript supported).
-- 💾 **Local-first** — everything is saved to your browser's `localStorage`. No
-  account, no server, no setup.
-- 🎨 **Tailwind ready** — Tailwind (Play CDN) is loaded, so utility classes in
+- ⚛️ **Live JSX/TSX** — compiled in the browser with `@babel/standalone`
+  (JSX **and** TypeScript), rendered behind an error boundary so a bad snippet
+  shows a friendly message instead of a blank screen.
+- 📝 **Markdown notes** rendered with `marked`.
+- 💾 **Durable storage** — entries are saved in **IndexedDB** (see below), so
+  they persist long-term on your device. Data from the previous localStorage
+  version is migrated automatically on first load.
+- 📦 **Export / Import** all entries as a JSON file (toolbar icons) for backup.
+- 🎨 **Tailwind ready** — Tailwind Play CDN is loaded, so utility classes in
   your pasted components work out of the box, just like artifacts.
-- 🔎 **Search** across titles, notes, and code.
-- 📦 **Export / Import** all journals as a JSON file for backup or sharing.
-- 🌱 **Example journals** seeded on first run so you have something to play with.
+- 🌱 **Seeded examples** on first run (welcome, live clock, bar chart).
+
+## Storage
+
+Journals are stored in **IndexedDB** under the database `visualiatorizms`
+(object store `journals`). IndexedDB was chosen because it is durable, has a
+large quota (code snippets add up), and needs no backend — a good fit for a
+static deployment. The storage layer lives in [`src/db.ts`](src/db.ts) and
+exposes a small async repository (`getAll`, `getOne`, `put`, `remove`,
+`serialize`, `importFrom`). Swapping in a cloud backend later only means
+providing another implementation of that interface.
 
 ## Writing a component
 
-Each journal's code should `export default` a React component:
+Each entry's code should `export default` a React component:
 
 ```tsx
 export default function Demo() {
   const [count, setCount] = useState(0);
   return (
     <button
-      className="rounded bg-indigo-600 px-4 py-2 text-white"
+      className="rounded bg-emerald-500 px-4 py-2 text-white"
       onClick={() => setCount((c) => c + 1)}
     >
       Clicked {count} times
@@ -37,41 +57,36 @@ export default function Demo() {
 }
 ```
 
-Notes:
-
 - Common hooks (`useState`, `useEffect`, `useRef`, `useMemo`, `useCallback`,
   `useReducer`, `useContext`, `useLayoutEffect`, `Fragment`) are available
   without importing them. You can also `import React from 'react'` explicitly.
 - Only `react` and `react-dom` are importable in the sandbox.
-- Both `.jsx` and `.tsx` are supported — pick the language from the dropdown.
+
+## Design
+
+The UI was designed with the **`ui-ux-pro-max`** skill, installed in this repo
+at [`.claude/skills/ui-ux-pro-max`](.claude/skills/ui-ux-pro-max). It produced
+the dark, developer-minimal direction: JetBrains Mono headings, IBM Plex Sans
+body, a slate palette with a green "run" accent, high contrast, and generous
+whitespace.
 
 ## Getting started
 
 ```bash
 npm install
-npm run dev      # start the dev server (http://localhost:5173)
+npm run dev      # http://localhost:5173
 npm run build    # type-check + production build into dist/
 npm run preview  # preview the production build
 ```
 
-## Deployment (GitHub Pages)
+## Deployment (Netlify)
 
-This repo ships a workflow at `.github/workflows/deploy.yml` that builds the app
-and publishes it to **GitHub Pages**. It runs on every push to the working
-branch / `main`, and can be triggered manually from the **Actions** tab
-(*Deploy to GitHub Pages* → *Run workflow*).
-
-The workflow auto-enables Pages (source = *GitHub Actions*). Once it completes,
-the site is available at:
-
-```
-https://<your-username>.github.io/<repo-name>/
-```
-
-The Vite `base` is set to `./` (relative), so the build works correctly from
-that sub-path with no extra configuration.
+`netlify.toml` is included: build command `npm run build`, publish dir `dist`,
+plus an SPA redirect. Import the repo in Netlify and deploy `main`. Routing uses
+a hash router, so it also works on any static host (including GitHub Pages)
+without server-side rewrite rules.
 
 ## Tech
 
-React 18 · Vite · TypeScript · `@babel/standalone` (in-browser compile) ·
-`marked` (Markdown notes).
+React 18 · React Router · Vite · TypeScript · `@babel/standalone` · `marked`
+· IndexedDB.
