@@ -36,18 +36,23 @@ offline, and local to one browser. A small facade in
 [`src/store.ts`](src/store.ts) routes reads/writes either to that local store
 or to the cloud, depending on whether sync is on.
 
-### Cross-device sync (optional)
+### Cross-device sync
 
-To sync journals across devices, connect a free **Supabase** project. The app
-calls Supabase's REST API directly from the browser (`src/cloud.ts`) — no
-backend server. Sync is **login-free**: each journal set lives under a long,
-random **sync code**; turn on sync on one device to get a code, then enter that
-same code on another device to share the data.
+This app is **pre-wired to a Supabase project** (see `src/supabaseConfig.ts`)
+and calls Supabase's REST API directly from the browser (`src/cloud.ts`) — no
+backend server. The publishable key is browser-safe by design; override the URL
+and key with `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` env vars to point at
+your own project, and rotate the key anytime in the Supabase dashboard.
 
-Click the **cloud icon** in the header to manage it. Full setup (create the
-project, run one SQL snippet, set two env vars) is in
-**[SUPABASE.md](SUPABASE.md)**. Without configuration the app simply stays
-local.
+Sync is **login-free**: each journal set lives under a long, random **sync
+code**. To use it:
+
+1. One-time: make sure the `journals` table exists in your Supabase project —
+   run the SQL in **[SUPABASE.md](SUPABASE.md)**.
+2. Click the **cloud icon** in the header → **Turn on sync**. This uploads the
+   journals on this device and shows a sync code. Copy it.
+3. On another device, open the app → cloud icon → **Connect with a code** →
+   paste the code. Both devices now share the same journals.
 
 > Trade-off: anyone who has your sync code can read/edit that journal set, so
 > keep it private. (Email-login accounts can be added later if you want stricter

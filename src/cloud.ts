@@ -1,4 +1,5 @@
 import type { Journal, Language } from './types';
+import { SUPABASE_KEY, SUPABASE_URL } from './supabaseConfig';
 
 /**
  * Cloud sync via Supabase's REST API (PostgREST), called directly from the
@@ -11,8 +12,8 @@ import type { Journal, Language } from './types';
  * read/write that space, so treat the code like a password.
  */
 
-const URL_BASE = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '') ?? '';
-const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
+const URL_BASE = SUPABASE_URL.replace(/\/$/, '');
+const ANON = SUPABASE_KEY;
 const TABLE = 'journals';
 const CODE_KEY = 'visualiatorizms.syncCode';
 
@@ -87,12 +88,17 @@ function journalToRow(code: string, j: Journal): Row {
 // ---- REST helpers ----
 
 function headers(extra?: Record<string, string>): Record<string, string> {
-  return {
+  const h: Record<string, string> = {
     apikey: ANON,
-    Authorization: `Bearer ${ANON}`,
     'Content-Type': 'application/json',
     ...extra,
   };
+  // New publishable/secret keys (sb_*) must NOT be sent as a Bearer token —
+  // only in the apikey header. Legacy JWT anon keys also go in Authorization.
+  if (!ANON.startsWith('sb_')) {
+    h.Authorization = `Bearer ${ANON}`;
+  }
+  return h;
 }
 
 async function request(path: string, init: RequestInit): Promise<Response> {
